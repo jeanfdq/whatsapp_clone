@@ -1,8 +1,11 @@
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:whatsapp_clone/utils/constants.dart';
+import 'package:whatsapp_clone/views/signup.dart';
 
+import 'views/home.dart';
 import 'views/login.dart';
 
 
@@ -12,7 +15,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  runApp( MaterialApp(
+  runApp( GetMaterialApp(
     debugShowCheckedModeBanner: false,
     theme: ThemeData(
       colorScheme: const ColorScheme( 
@@ -29,6 +32,12 @@ void main() async {
         onError: Colors.white
       ),
     ),
-    home: Login()
-  ),);
+    home: Login(),
+    getPages: [
+      GetPage(name: Home.id, page: () => const Home()) ,
+      GetPage(name: Login.id, page: () => Login()) ,
+      GetPage(name: SignUp.id, page: () => SignUp()) ,
+    ],
+  ),
+  );
 }
