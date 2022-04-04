@@ -16,8 +16,10 @@ class Login extends StatelessWidget {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: InkWell(
         onTap: _hiddenKeyboard,
@@ -103,7 +105,7 @@ class Login extends StatelessWidget {
         final userCredencial = await auth.signInWithEmailAndPassword(
             email: _emailController.text, password: _passwordController.text);
         if (userCredencial.user != null) {
-          Get.offAndToNamed(Home.id);
+          _goToHome();
         }
       } catch (e) {
         ShowSnackbarMessage(this)
@@ -116,7 +118,12 @@ class Login extends StatelessWidget {
     Get.toNamed(SignUp.id);
   }
 
-  _hiddenKeyboard() {
+  void _hiddenKeyboard() {
     FocusManager.instance.primaryFocus?.unfocus();
   }
+
+  void _goToHome(){
+    Get.offAndToNamed(Home.id);
+  }
+
 }

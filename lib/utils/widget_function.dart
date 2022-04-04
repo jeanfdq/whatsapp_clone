@@ -24,3 +24,8 @@ FirebaseAuth instanceAuth(){
 FirebaseFirestore instanceDB(){
   return FirebaseFirestore.instance;
 }
+
+User? currentUser() {
+  final user = instanceAuth().currentUser;
+  return user; 
+}

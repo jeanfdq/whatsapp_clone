@@ -18,8 +18,8 @@ class SignUp extends StatelessWidget {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  var isValidFields = true;
-  var errorMessage = "";
+  final isValidFields = true;
+  final errorMessage = "";
 
   @override
   Widget build(BuildContext context) {
@@ -131,10 +131,6 @@ class SignUp extends StatelessWidget {
     } else {
 
         final account = Account(id: const Uuid().v1(), name: _nameController.text, email: _emailController.text, password: _passwordController.text);
-        final db = instanceDB();
-        await db.collection("users")
-        .doc(account.id)
-        .set(account.toMap()).then((user) async {
 
           final auth = instanceAuth();
           final userCredencial = await auth.createUserWithEmailAndPassword(email: account.email, password: account.password).catchError((error){
@@ -144,16 +140,18 @@ class SignUp extends StatelessWidget {
           final user = userCredencial.user;
           if (user != null) {
             user.updateDisplayName(account.name);
+
+            final db = instanceDB();
+            account.id = user.uid;
+            await db.collection("users")
+              .doc(account.id)
+              .set(account.toMap());
             
-             Get.offAndToNamed(Home.id);
+             Get.offAllNamed(Home.id);
 
           } else {
             ShowSnackbarMessage(this).showSnack("Ops! Algo deu errado!", type: snackBarType.error);
           }
-
-        }).catchError((error){
-          ShowSnackbarMessage(this).showSnack("Ops! Algo deu errado!", type: snackBarType.error);
-        });
     }
   }
 }
