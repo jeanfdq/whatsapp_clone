@@ -46,19 +46,19 @@ class _HomeState extends State<Home> {
           bottom: const TabBar(
             indicatorColor: Colors.white,
             indicatorSize: TabBarIndicatorSize.tab,
-            indicatorWeight: 4,
+            indicatorWeight: 2,
             tabs: [
               Tab(
                   child: Icon(
                 Icons.forum,
                 color: Colors.white,
-                size: 32,
+                size: 22,
               )),
               Tab(
                   child: Icon(
                 Icons.perm_contact_calendar,
                 color: Colors.white,
-                size: 32,
+                size: 22,
               )),
             ],
           ),
