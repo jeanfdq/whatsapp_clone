@@ -1,6 +1,7 @@
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:whatsapp_clone/views/profile.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -73,7 +74,7 @@ class _HomeState extends State<Home> {
   }
 
   _goToProfile() {
-    log("message");
+    Get.toNamed(Profile.id);
   }
 
 }

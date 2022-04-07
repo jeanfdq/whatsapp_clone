@@ -4,13 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:whatsapp_clone/utils/constants.dart';
 import 'package:whatsapp_clone/utils/widget_function.dart';
+import 'package:whatsapp_clone/views/profile.dart';
 import 'package:whatsapp_clone/views/signup.dart';
 
 import 'views/home.dart';
 import 'views/login.dart';
-
-
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +38,7 @@ void main() async {
       GetPage(name: Home.id, page: () => const Home()) ,
       GetPage(name: Login.id, page: () => Login()) ,
       GetPage(name: SignUp.id, page: () => SignUp()) ,
+      GetPage(name: Profile.id, page: () => const Profile())
     ],
   ),
   );
