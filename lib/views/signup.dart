@@ -130,7 +130,7 @@ class SignUp extends StatelessWidget {
           type: snackBarType.error);
     } else {
 
-        final account = Account(id: const Uuid().v1(), name: _nameController.text, email: _emailController.text, password: _passwordController.text);
+        final account = Account(id: const Uuid().v1(), name: _nameController.text, email: _emailController.text, imageProfile: "", password: _passwordController.text);
 
           final auth = instanceAuth();
           final userCredencial = await auth.createUserWithEmailAndPassword(email: account.email, password: account.password).catchError((error){
@@ -145,10 +145,7 @@ class SignUp extends StatelessWidget {
             account.id = user.uid;
             await db.collection("users")
               .doc(account.id)
-              .set(account.toMap());
-            
-             Get.offAllNamed(Home.id);
-
+              .set(account.toMap()).whenComplete(() => Get.offAllNamed(Home.id));
           } else {
             ShowSnackbarMessage(this).showSnack("Ops! Algo deu errado!", type: snackBarType.error);
           }

@@ -1,17 +1,18 @@
 import 'dart:convert';
 
-
 class Account {
 
    String id;
    String name;
    String email;
+   String imageProfile;
    String password;
 
   Account({
     required this.id,
     required this.name,
     required this.email,
+    required this.imageProfile,
     required this.password,
   });
 
@@ -21,6 +22,7 @@ class Account {
       'id': id,
       'name': name,
       'email': email,
+      'imageProfile': imageProfile
     };
   }
 
@@ -29,6 +31,7 @@ class Account {
       id: map['id'] ?? '',
       name: map['name'] ?? '',
       email: map['email'] ?? '',
+      imageProfile: map['imageProfile'] ?? '',
       password: map['password'] ?? '',
     );
   }
@@ -36,4 +39,9 @@ class Account {
   String toJson() => json.encode(toMap());
 
   factory Account.fromJson(String source) => Account.fromMap(json.decode(source));
+
+  @override
+  String toString() {
+    return 'Account(id: $id, name: $name, email: $email, imageProfile: $imageProfile, password: $password)';
+  }
 }
