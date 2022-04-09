@@ -1,6 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:whatsapp_clone/views/chat.dart';
+import 'package:whatsapp_clone/views/contacts.dart';
 import 'package:whatsapp_clone/views/profile.dart';
 
 class Home extends StatefulWidget {
@@ -65,8 +67,8 @@ class _HomeState extends State<Home> {
         ),
         body: const TabBarView(
           children: [
-            Text("Tab1"),
-            Text("Tab2"),
+            Chat(),
+            Contacts(),
           ],
         ),
       ),

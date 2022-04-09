@@ -38,7 +38,7 @@ void main() async {
       GetPage(name: Home.id, page: () => const Home()) ,
       GetPage(name: Login.id, page: () => Login()) ,
       GetPage(name: SignUp.id, page: () => SignUp()) ,
-      GetPage(name: Profile.id, page: () => const Profile())
+      GetPage(name: Profile.id, page: () => const Profile()),
     ],
   ),
   );
