@@ -26,6 +26,7 @@ class _ProfileState extends State<Profile> {
 
   final _nameController = TextEditingController();
   String imageUrl = "";
+  bool showLoading = false;
 
   @override
   void initState() {
@@ -58,7 +59,8 @@ class _ProfileState extends State<Profile> {
                 child: CircleAvatar(
                   radius: 70,
                   backgroundColor: kPrimaryColor,
-                  backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null ,
+                  backgroundImage:
+                      imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
                   child: Center(
                     child: Visibility(
                       visible: imageUrl.isEmpty,
@@ -121,6 +123,7 @@ class _ProfileState extends State<Profile> {
   }
 
   _getUserData() async {
+
     await instanceDB().collection("users").doc(userID).get().then((snapshot) {
       final map = snapshot.data();
       if (map != null) {
@@ -156,9 +159,10 @@ class _ProfileState extends State<Profile> {
   }
 
   _getImageProfile() async {
+    addDialog(context, false);
     final imageSelected =
         await ImagePicker().pickImage(source: ImageSource.gallery);
-
+    
     if (imageSelected != null) {
       if (userID != null) {
         final storage = instanceStorage();
@@ -175,17 +179,21 @@ class _ProfileState extends State<Profile> {
         setState(() {
           imageUrl = profileUrl;
         });
+        addDialog(context, true);
       }
     } else {
       log("Nenhuma imagem selecionada!");
+      addDialog(context, true);
     }
   }
 
   void _saveProfile() async {
-     await instanceDB()
-            .collection("users")
-            .doc(userID)
-            .update({ "name": _nameController.text , "imageProfile": imageUrl});
-      Get.back();
+    addDialog(context, false);
+    await instanceDB()
+        .collection("users")
+        .doc(userID)
+        .update({"name": _nameController.text, "imageProfile": imageUrl});
+    addDialog(context, true);
+    Get.back();
   }
 }
