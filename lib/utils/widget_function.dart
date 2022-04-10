@@ -35,6 +35,14 @@ User? currentUser() {
   return user; 
 }
 
+Future<String> getProfileCurrentUser() async {
+  final db = instanceDB();
+  final snapshot = await db.collection("users").doc(currentUser()!.uid).get();
+
+  final data = snapshot.data();
+  return data?["imageProfile"] ?? "";
+}
+
 void addDialog( BuildContext context, bool dismiss){
   if (dismiss) {
       Navigator.pop(context);

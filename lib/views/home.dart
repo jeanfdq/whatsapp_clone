@@ -5,6 +5,9 @@ import 'package:whatsapp_clone/views/chat.dart';
 import 'package:whatsapp_clone/views/contacts.dart';
 import 'package:whatsapp_clone/views/profile.dart';
 
+import '../utils/widget_function.dart';
+
+
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -15,9 +18,22 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
+  String urlProfile = "";
+
+
   @override
   void initState() {
     super.initState();
+
+    _getProfile();
+
+  }
+
+  _getProfile()async {
+    urlProfile = await getProfileCurrentUser();
+    setState(() {
+    });
   }
 
   @override
@@ -37,10 +53,9 @@ class _HomeState extends State<Home> {
               padding: const EdgeInsets.only(right: 15),
               child: InkWell(
                 onTap: _goToProfile,
-                child: const Icon(
-                  Icons.account_circle,
-                  color: Colors.white,
-                  size: 32,
+                child: CircleAvatar(
+                  backgroundColor: Colors.grey,
+                  backgroundImage:  urlProfile.isEmpty ? null : NetworkImage(urlProfile),
                 ),
               ),
             ),
