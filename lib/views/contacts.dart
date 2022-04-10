@@ -41,8 +41,8 @@ class Contacts extends StatelessWidget {
                             contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                             leading: CircleAvatar(
                                     radius: 22,
-                                    backgroundImage:
-                                        NetworkImage(contact.imageProfile),
+                                    backgroundColor: Colors.grey,
+                                    backgroundImage: contact.imageProfile.isEmpty ? null : NetworkImage(contact.imageProfile),
                                   ),
                                   title: Text(
                                         contact.name,
