@@ -80,10 +80,10 @@ class _HomeState extends State<Home> {
             ],
           ),
         ),
-        body: const TabBarView(
+        body: TabBarView(
           children: [
             Chat(),
-            Contacts(),
+            const Contacts(),
           ],
         ),
       ),

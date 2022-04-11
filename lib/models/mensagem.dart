@@ -41,6 +41,7 @@ class Mensagem {
       'message': message,
       'urlImage': urlImage,
       'tipo': tipo,
+      'data':DateTime.now()
     };
   }
 

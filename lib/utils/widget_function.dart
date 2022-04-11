@@ -5,6 +5,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../models/account.dart';
+
 Widget addVerticalSpace(double height ) {
   return SizedBox(height: height);
 }
@@ -41,6 +43,13 @@ Future<String> getProfileCurrentUser() async {
 
   final data = snapshot.data();
   return data?["imageProfile"] ?? "";
+}
+
+Future<Account?> getUserData(String id) async {
+  final db = instanceDB();
+  final snapshot = await db.collection("users").doc(id).get();
+  final map = snapshot.data();
+  return map != null ? Account.fromMap(map) : null;
 }
 
 void addDialog( BuildContext context, bool dismiss){
