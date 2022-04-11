@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -22,7 +23,7 @@ class ChatContact extends StatelessWidget {
   final db = instanceDB();
   final _streamController =
       StreamController<QuerySnapshot<Map<String, dynamic>>>.broadcast();
-  
+  final _scrollCotroller = ScrollController();
 
   final _messageController = TextEditingController();
 
@@ -62,8 +63,7 @@ class ChatContact extends StatelessWidget {
       _messageController.clear();
 
       _saveLastMessage(message);
-
-      
+      _goLastMessage();
     }
   }
 
@@ -105,6 +105,7 @@ class ChatContact extends StatelessWidget {
       _messageController.clear();
 
       _saveLastMessage(message);
+      _goLastMessage();
 
       addDialog(Get.context!, true);
     } else {
@@ -119,27 +120,44 @@ class ChatContact extends StatelessWidget {
   }
 
   void _saveLastMessage(Mensagem message) async {
-
     var user = await getUserData(message.idUserTo);
-      if (user != null) {
-        final lastChat = LastChat(userId: userId, messageUserId: user.id, messageUserName: user.name, messageUserProfile: user.imageProfile, message: message.message, urlPhoto: message.urlImage, typeMessage: message.tipo);
-        await db
+    if (user != null) {
+      final lastChat = LastChat(
+          userId: userId,
+          messageUserId: user.id,
+          messageUserName: user.name,
+          messageUserProfile: user.imageProfile,
+          message: message.message,
+          urlPhoto: message.urlImage,
+          typeMessage: message.tipo);
+      await db
           .collection("last_message")
           .doc(userId)
           .collection("message")
           .doc(contact!.id)
           .set(lastChat.toMap());
-      }
-      user = await getUserData(message.idUserFrom);
-      if (user != null) {
-        final lastChat = LastChat(userId: message.idUserTo, messageUserId: user.id, messageUserName: user.name, messageUserProfile: user.imageProfile, message: message.message, urlPhoto: message.urlImage, typeMessage: message.tipo);
-        await db
+    }
+    user = await getUserData(message.idUserFrom);
+    if (user != null) {
+      final lastChat = LastChat(
+          userId: message.idUserTo,
+          messageUserId: user.id,
+          messageUserName: user.name,
+          messageUserProfile: user.imageProfile,
+          message: message.message,
+          urlPhoto: message.urlImage,
+          typeMessage: message.tipo);
+      await db
           .collection("last_message")
           .doc(contact!.id)
           .collection("message")
           .doc(userId)
           .set(lastChat.toMap());
-      }
+    }
+  }
+
+  void _goLastMessage(){
+_scrollCotroller.jumpTo(_scrollCotroller.position.maxScrollExtent);
   }
 
   @override
@@ -148,6 +166,10 @@ class ChatContact extends StatelessWidget {
       Get.back();
     } else {
       _getMessages();
+      Timer( const Duration(milliseconds: 500), (){
+        _goLastMessage();
+      } );
+      
     }
 
     var stream = Expanded(
@@ -166,6 +188,7 @@ class ChatContact extends StatelessWidget {
               return querySnapshots!.docs.isEmpty
                   ? _noContactsText()
                   : ListView.builder(
+                      controller: _scrollCotroller,
                       itemCount: querySnapshots.docs.length,
                       itemBuilder: (context, index) {
                         List<DocumentSnapshot> messages =
@@ -239,6 +262,7 @@ class ChatContact extends StatelessWidget {
             ),
           ),
         ),
+        Platform.isAndroid ? 
         FloatingActionButton(
           backgroundColor: kPrimaryColor,
           child: const Icon(
@@ -247,7 +271,7 @@ class ChatContact extends StatelessWidget {
           ),
           mini: true,
           onPressed: _sendMessage,
-        )
+        ) : CupertinoButton(child: const Text("enviar", style: TextStyle( color: Colors.blueAccent, fontSize: 16 ),), onPressed: _sendMessage),
       ],
     );
 
