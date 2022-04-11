@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
@@ -8,8 +7,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:whatsapp_clone/components/base_alert_dialog.dart';
 import 'package:whatsapp_clone/models/account.dart';
 import 'package:whatsapp_clone/utils/constants.dart';
+import 'package:whatsapp_clone/utils/database/current_user.dart';
 
-import '../utils/widget_function.dart';
+import '../components/dialog.dart';
+import '../utils/database/instances.dart';
 import 'login.dart';
 
 class Profile extends StatefulWidget {
@@ -22,7 +23,7 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  final userID = currentUser()?.uid;
+  final userID = getCurrentUserId();
 
   final _nameController = TextEditingController();
   String imageUrl = "";
@@ -164,25 +165,22 @@ class _ProfileState extends State<Profile> {
         await ImagePicker().pickImage(source: ImageSource.gallery);
     
     if (imageSelected != null) {
-      if (userID != null) {
-        final storage = instanceStorage();
-        final root = storage.ref();
-        final profile = root.child("profile").child("$userID.jpeg");
-        UploadTask task = profile.putFile(File(imageSelected.path));
-        final profileUrl = await (await task).ref.getDownloadURL();
+      final storage = instanceStorage();
+      final root = storage.ref();
+      final profile = root.child("profile").child("$userID.jpeg");
+      UploadTask task = profile.putFile(File(imageSelected.path));
+      final profileUrl = await (await task).ref.getDownloadURL();
 
-        await instanceDB()
-            .collection("users")
-            .doc(userID)
-            .update({"imageProfile": profileUrl});
+      await instanceDB()
+          .collection("users")
+          .doc(userID)
+          .update({"imageProfile": profileUrl});
 
-        setState(() {
-          imageUrl = profileUrl;
-        });
-        addDialog(context, true);
-      }
+      setState(() {
+        imageUrl = profileUrl;
+      });
+      addDialog(context, true);
     } else {
-      log("Nenhuma imagem selecionada!");
       addDialog(context, true);
     }
   }

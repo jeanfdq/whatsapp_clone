@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:whatsapp_clone/components/vertical_space.dart';
 
-import '../utils/widget_function.dart';
 
 class ProgressIndicatorBox extends StatelessWidget {
   const ProgressIndicatorBox({

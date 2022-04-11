@@ -1,19 +1,23 @@
 
 import 'package:flutter/material.dart';
+import 'package:whatsapp_clone/components/empty_center_text.dart';
 import 'package:whatsapp_clone/components/progress_indicator_box.dart';
 import 'package:whatsapp_clone/models/account.dart';
-import 'package:whatsapp_clone/utils/widget_function.dart';
 import 'package:whatsapp_clone/views/chat_contact.dart';
+
+import '../utils/database/get_contacts.dart';
 
 class Contacts extends StatelessWidget {
    const Contacts({Key? key}) : super(key: key);
 
+   final emptyText = "Nenhum contato cadastrado!";
+
   @override
   Widget build(BuildContext context) {
-    _getContacts();
+
     return Scaffold(
       body: FutureBuilder<List<Account>>(
-        future: _getContacts(),
+        future: getContacts(),
         initialData: const [],
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
@@ -31,7 +35,7 @@ class Contacts extends StatelessWidget {
                 final listOfContacts = snapshot.data ?? [];
 
                 return listOfContacts.isEmpty
-                    ? _noContactsText()
+                    ? setEmptyCenterText(emptyText)
                     : ListView.builder(
                         itemCount: listOfContacts.length,
                         itemBuilder: (context, index) {
@@ -62,29 +66,11 @@ class Contacts extends StatelessWidget {
                         },
                       );
               } else {
-                return _noContactsText();
+                return setEmptyCenterText(emptyText);
               }
           }
         },
       ),
-    );
-  }
-
-  Future<List<Account>> _getContacts() async {
-    final db = instanceDB();
-    final snapshots = await db.collection("users").where("id", isNotEqualTo: currentUser()!.uid).get();
-
-    List<Account> listOfContacts = snapshots.docs.map((item) {
-      var map = item.data();
-      final user = Account.fromMap(map);
-      return user;
-    }).toList();
-    return listOfContacts;
-  }
-
-  Widget _noContactsText() {
-    return const Center(
-      child: Text("Nenhum contato cadastrado!"),
     );
   }
 

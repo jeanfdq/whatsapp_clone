@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../widget_function.dart';
+import '../../components/horizontal_space.dart';
 
 enum snackBarType { error, success, basic }
 

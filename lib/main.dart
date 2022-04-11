@@ -3,10 +3,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:whatsapp_clone/utils/constants.dart';
-import 'package:whatsapp_clone/utils/widget_function.dart';
 import 'package:whatsapp_clone/views/profile.dart';
 import 'package:whatsapp_clone/views/signup.dart';
 
+import 'utils/database/current_user.dart';
 import 'views/home.dart';
 import 'views/login.dart';
 

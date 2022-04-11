@@ -3,11 +3,12 @@ import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:whatsapp_clone/models/account.dart';
 import 'package:whatsapp_clone/utils/constants.dart';
+import 'package:whatsapp_clone/utils/database/create_user.dart';
 import 'package:whatsapp_clone/utils/extensions/stateless_extension.dart';
-import 'package:whatsapp_clone/utils/widget_function.dart';
 import 'package:whatsapp_clone/views/home.dart';
 
 import '../components/custom_login_textfield.dart';
+import '../components/vertical_space.dart';
 
 class SignUp extends StatelessWidget {
   SignUp({Key? key}) : super(key: key);
@@ -132,20 +133,9 @@ class SignUp extends StatelessWidget {
 
         final account = Account(id: const Uuid().v1(), name: _nameController.text, email: _emailController.text, imageProfile: "", password: _passwordController.text);
 
-          final auth = instanceAuth();
-          final userCredencial = await auth.createUserWithEmailAndPassword(email: account.email, password: account.password).catchError((error){
-            ShowSnackbarMessage(this).showSnack("Ops! Algo deu errado!", type: snackBarType.error);
-          });
-
-          final user = userCredencial.user;
+        final user = await createUser(account);
           if (user != null) {
-            user.updateDisplayName(account.name);
-
-            final db = instanceDB();
-            account.id = user.uid;
-            await db.collection("users")
-              .doc(account.id)
-              .set(account.toMap()).whenComplete(() => Get.offAllNamed(Home.id));
+            Get.offAllNamed(Home.id);
           } else {
             ShowSnackbarMessage(this).showSnack("Ops! Algo deu errado!", type: snackBarType.error);
           }

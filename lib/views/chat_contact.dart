@@ -6,20 +6,25 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:whatsapp_clone/models/last_chat.dart';
+import 'package:whatsapp_clone/components/empty_center_text.dart';
 import 'package:whatsapp_clone/models/mensagem.dart';
+import 'package:whatsapp_clone/utils/database/current_user.dart';
+import 'package:whatsapp_clone/utils/database/save_photo_chat.dart';
+import 'package:whatsapp_clone/utils/database/send_message_chat.dart';
 
+import '../components/dialog.dart';
 import '../components/progress_indicator_box.dart';
 import '../models/account.dart';
 import '../utils/constants.dart';
-import '../utils/widget_function.dart';
+import '../utils/database/get_messages_chat.dart';
+import '../utils/database/instances.dart';
 
 class ChatContact extends StatelessWidget {
   ChatContact({Key? key, required this.contact}) : super(key: key);
   static const id = "/ChatContact";
 
   final Account? contact;
-  final userId = currentUser()!.uid;
+  final userId = getCurrentUserId();
   final db = instanceDB();
   final _streamController =
       StreamController<QuerySnapshot<Map<String, dynamic>>>.broadcast();
@@ -27,138 +32,7 @@ class ChatContact extends StatelessWidget {
 
   final _messageController = TextEditingController();
 
-  void _getMessages() {
-    db
-        .collection("messages")
-        .doc(userId)
-        .collection(contact!.id)
-        .orderBy("data")
-        .snapshots()
-        .listen((event) {
-      _streamController.add(event);
-    });
-  }
-
-  void _sendMessage() async {
-    if (_messageController.text.trim().isNotEmpty) {
-      final message = Mensagem(
-          idUserFrom: userId,
-          idUserTo: contact!.id,
-          message: _messageController.text,
-          urlImage: "",
-          tipo: "M");
-
-      await db
-          .collection("messages")
-          .doc(userId)
-          .collection(contact!.id)
-          .add(message.toMap());
-      _messageController.clear();
-
-      await db
-          .collection("messages")
-          .doc(contact!.id)
-          .collection(userId)
-          .add(message.toMap());
-      _messageController.clear();
-
-      _saveLastMessage(message);
-      _goLastMessage();
-    }
-  }
-
-  void _sendPhoto() async {
-    addDialog(Get.context!, false);
-
-    final imageSelected =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-
-    if (imageSelected != null) {
-      final storage = instanceStorage();
-      final root = storage.ref();
-      final profile = root
-          .child("messages")
-          .child("$userId.jpeg")
-          .child(DateTime.now().microsecondsSinceEpoch.toString());
-      final task = profile.putFile(File(imageSelected.path));
-      final profileUrl = await (await task).ref.getDownloadURL();
-
-      final message = Mensagem(
-          idUserFrom: userId,
-          idUserTo: contact!.id,
-          message: "",
-          urlImage: profileUrl,
-          tipo: "P");
-
-      await db
-          .collection("messages")
-          .doc(userId)
-          .collection(contact!.id)
-          .add(message.toMap());
-      _messageController.clear();
-
-      await db
-          .collection("messages")
-          .doc(contact!.id)
-          .collection(userId)
-          .add(message.toMap());
-      _messageController.clear();
-
-      _saveLastMessage(message);
-      _goLastMessage();
-
-      addDialog(Get.context!, true);
-    } else {
-      addDialog(Get.context!, true);
-    }
-  }
-
-  Widget _noContactsText() {
-    return const Center(
-      child: Text("Nenhum contato cadastrado!"),
-    );
-  }
-
-  void _saveLastMessage(Mensagem message) async {
-    var user = await getUserData(message.idUserTo);
-    if (user != null) {
-      final lastChat = LastChat(
-          userId: userId,
-          messageUserId: user.id,
-          messageUserName: user.name,
-          messageUserProfile: user.imageProfile,
-          message: message.message,
-          urlPhoto: message.urlImage,
-          typeMessage: message.tipo);
-      await db
-          .collection("last_message")
-          .doc(userId)
-          .collection("message")
-          .doc(contact!.id)
-          .set(lastChat.toMap());
-    }
-    user = await getUserData(message.idUserFrom);
-    if (user != null) {
-      final lastChat = LastChat(
-          userId: message.idUserTo,
-          messageUserId: user.id,
-          messageUserName: user.name,
-          messageUserProfile: user.imageProfile,
-          message: message.message,
-          urlPhoto: message.urlImage,
-          typeMessage: message.tipo);
-      await db
-          .collection("last_message")
-          .doc(contact!.id)
-          .collection("message")
-          .doc(userId)
-          .set(lastChat.toMap());
-    }
-  }
-
-  void _goLastMessage(){
-_scrollCotroller.jumpTo(_scrollCotroller.position.maxScrollExtent);
-  }
+  final emptyText = "Nenhum contato cadastrado!";
 
   @override
   Widget build(BuildContext context) {
@@ -166,10 +40,9 @@ _scrollCotroller.jumpTo(_scrollCotroller.position.maxScrollExtent);
       Get.back();
     } else {
       _getMessages();
-      Timer( const Duration(milliseconds: 500), (){
+      Timer(const Duration(milliseconds: 500), () {
         _goLastMessage();
-      } );
-      
+      });
     }
 
     var stream = Expanded(
@@ -181,12 +54,12 @@ _scrollCotroller.jumpTo(_scrollCotroller.position.maxScrollExtent);
           } else if (snapshot.connectionState == ConnectionState.active ||
               snapshot.connectionState == ConnectionState.done) {
             if (!snapshot.hasData) {
-              return _noContactsText();
+              return setEmptyCenterText(emptyText);
             } else {
               final querySnapshots = snapshot.data;
 
               return querySnapshots!.docs.isEmpty
-                  ? _noContactsText()
+                  ? setEmptyCenterText(emptyText)
                   : ListView.builder(
                       controller: _scrollCotroller,
                       itemCount: querySnapshots.docs.length,
@@ -231,7 +104,7 @@ _scrollCotroller.jumpTo(_scrollCotroller.position.maxScrollExtent);
                     );
             }
           } else {
-            return _noContactsText();
+            return setEmptyCenterText(emptyText);
           }
         },
       ),
@@ -262,16 +135,22 @@ _scrollCotroller.jumpTo(_scrollCotroller.position.maxScrollExtent);
             ),
           ),
         ),
-        Platform.isAndroid ? 
-        FloatingActionButton(
-          backgroundColor: kPrimaryColor,
-          child: const Icon(
-            Icons.send,
-            color: Colors.white,
-          ),
-          mini: true,
-          onPressed: _sendMessage,
-        ) : CupertinoButton(child: const Text("enviar", style: TextStyle( color: Colors.blueAccent, fontSize: 16 ),), onPressed: _sendMessage),
+        Platform.isAndroid
+            ? FloatingActionButton(
+                backgroundColor: kPrimaryColor,
+                child: const Icon(
+                  Icons.send,
+                  color: Colors.white,
+                ),
+                mini: true,
+                onPressed: _sendMessage,
+              )
+            : CupertinoButton(
+                child: const Text(
+                  "enviar",
+                  style: TextStyle(color: Colors.blueAccent, fontSize: 16),
+                ),
+                onPressed: _sendMessage),
       ],
     );
 
@@ -316,4 +195,57 @@ _scrollCotroller.jumpTo(_scrollCotroller.position.maxScrollExtent);
       ),
     );
   }
+
+  void _getMessages() {
+    final stream = getMessagesChat(contact!.id);
+
+    stream.listen((event) {
+      _streamController.add(event);
+    });
+  }
+
+  void _sendMessage() async {
+    if (_messageController.text.trim().isNotEmpty) {
+      final message = Mensagem(
+          idUserFrom: userId,
+          idUserTo: contact!.id,
+          message: _messageController.text,
+          urlImage: "",
+          tipo: "M");
+
+      sendMessageChat(message);
+      _goLastMessage();
+    }
+  }
+
+  void _sendPhoto() async {
+    addDialog(Get.context!, false);
+
+    final imageSelected =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+
+    if (imageSelected != null) {
+      
+      final profileUrl = await savePhotoChat(imageSelected);
+
+      final message = Mensagem(
+          idUserFrom: userId,
+          idUserTo: contact!.id,
+          message: "",
+          urlImage: profileUrl,
+          tipo: "P");
+
+      sendMessageChat(message);
+      _goLastMessage();
+
+      addDialog(Get.context!, true);
+    } else {
+      addDialog(Get.context!, true);
+    }
+  }
+
+  void _goLastMessage() {
+    _scrollCotroller.jumpTo(_scrollCotroller.position.maxScrollExtent);
+  }
+  
 }

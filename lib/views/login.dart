@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:whatsapp_clone/utils/constants.dart';
+import 'package:whatsapp_clone/utils/database/create_login.dart';
 import 'package:whatsapp_clone/utils/extensions/stateless_extension.dart';
-import 'package:whatsapp_clone/utils/widget_function.dart';
 import 'package:whatsapp_clone/views/home.dart';
 import 'package:whatsapp_clone/views/signup.dart';
 
 import '../components/custom_login_textfield.dart';
+import '../components/vertical_space.dart';
 
 class Login extends StatelessWidget {
   Login({Key? key}) : super(key: key);
@@ -100,14 +101,11 @@ class Login extends StatelessWidget {
     } else {
       _hiddenKeyboard();
 
-      final auth = instanceAuth();
-      try {
-        final userCredencial = await auth.signInWithEmailAndPassword(
-            email: _emailController.text, password: _passwordController.text);
-        if (userCredencial.user != null) {
-          _goToHome();
-        }
-      } catch (e) {
+      final user = await createLogin(_emailController.text, _passwordController.text);
+
+      if (user != null) {
+        _goToHome();
+      } else {
         ShowSnackbarMessage(this)
             .showSnack("Ops! Algo deu errado!", type: snackBarType.error);
       }

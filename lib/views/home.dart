@@ -1,12 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:whatsapp_clone/views/chat.dart';
 import 'package:whatsapp_clone/views/contacts.dart';
 import 'package:whatsapp_clone/views/profile.dart';
 
-import '../utils/widget_function.dart';
-
+import '../utils/database/current_user.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -18,22 +16,13 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   String urlProfile = "";
-
 
   @override
   void initState() {
     super.initState();
 
     _getProfile();
-
-  }
-
-  _getProfile()async {
-    urlProfile = await getProfileCurrentUser();
-    setState(() {
-    });
   }
 
   @override
@@ -55,7 +44,8 @@ class _HomeState extends State<Home> {
                 onTap: _goToProfile,
                 child: CircleAvatar(
                   backgroundColor: Colors.grey,
-                  backgroundImage:  urlProfile.isEmpty ? null : NetworkImage(urlProfile),
+                  backgroundImage:
+                      urlProfile.isEmpty ? null : NetworkImage(urlProfile),
                 ),
               ),
             ),
@@ -90,8 +80,12 @@ class _HomeState extends State<Home> {
     );
   }
 
+  _getProfile() async {
+    urlProfile = await getProfileCurrentUser();
+    setState(() {});
+  }
+
   _goToProfile() {
     Get.toNamed(Profile.id);
   }
-
 }
